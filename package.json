@@ -1,7 +1,7 @@
 {
 	"name": "teamviu",
 	"productName": "Teamviu",
-	"version": "1.0.0",
+	"version": "0.0.1",
 	"description": "Deep work tracker for remote tech teams",
 	"license": "MIT",
 	"repository": "teamviu-admin/teamviu-desktop-app",
