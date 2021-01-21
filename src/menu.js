@@ -9,7 +9,8 @@ const {
 	openNewGitHubIssue,
 	debugInfo
 } = require('electron-util');
-const config = require('./config');
+const version = app.getVersion();
+const name = app.getName();
 
 const showPreferences = () => {
 	// Show the app's preferences here
@@ -18,11 +19,11 @@ const showPreferences = () => {
 const helpSubmenu = [
 	openUrlMenuItem({
 		label: 'Website',
-		url: 'https://github.com/sindresorhus/electron-boilerplate'
+		url: 'https://www.teamviu.io'
 	}),
 	openUrlMenuItem({
 		label: 'Source Code',
-		url: 'https://github.com/sindresorhus/electron-boilerplate'
+		url: 'https://github.com/teamviu-admin/teamviu-desktop-app'
 	}),
 	{
 		label: 'Report an Issue…',
@@ -36,33 +37,17 @@ const helpSubmenu = [
 ${debugInfo()}`;
 
 			openNewGitHubIssue({
-				user: 'sindresorhus',
-				repo: 'electron-boilerplate',
+				user: 'teamviu-admin',
+				repo: 'teamviu-desktop-app',
 				body
 			});
 		}
+	}, {
+		label: name + " Version " + version
 	}
 ];
 
-if (!is.macos) {
-	helpSubmenu.push(
-		{
-			type: 'separator'
-		},
-		aboutMenuItem({
-			icon: path.join(__dirname, 'static', 'icon.png'),
-			text: 'Created by Your Name'
-		})
-	);
-}
-
 const debugSubmenu = [
-	{
-		label: 'Show Settings',
-		click() {
-			config.openInEditor();
-		}
-	},
 	{
 		label: 'Show App Data',
 		click() {
@@ -71,14 +56,6 @@ const debugSubmenu = [
 	},
 	{
 		type: 'separator'
-	},
-	{
-		label: 'Delete Settings',
-		click() {
-			config.clear();
-			app.relaunch();
-			app.quit();
-		}
 	},
 	{
 		label: 'Delete App Data',
@@ -91,24 +68,9 @@ const debugSubmenu = [
 ];
 
 const macosTemplate = [
-	appMenu([
-		{
-			label: 'Preferences…',
-			accelerator: 'Command+,',
-			click() {
-				showPreferences();
-			}
-		}
-	]),
 	{
 		role: 'fileMenu',
 		submenu: [
-			{
-				label: 'Custom'
-			},
-			{
-				type: 'separator'
-			},
 			{
 				role: 'close'
 			}
@@ -134,22 +96,6 @@ const otherTemplate = [
 	{
 		role: 'fileMenu',
 		submenu: [
-			{
-				label: 'Custom'
-			},
-			{
-				type: 'separator'
-			},
-			{
-				label: 'Settings',
-				accelerator: 'Control+,',
-				click() {
-					showPreferences();
-				}
-			},
-			{
-				type: 'separator'
-			},
 			{
 				role: 'quit'
 			}
