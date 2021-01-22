@@ -3,7 +3,6 @@
 const path = require('path');
 const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, powerMonitor} = require('electron');
 const unhandled = require('electron-unhandled');
-const debug = require('electron-debug');
 const contextMenu = require('electron-context-menu');
 const {is} = require('electron-util');
 const log = require('electron-log');
@@ -11,9 +10,11 @@ const menu = require('./src/menu');
 const updator = require("./src/updator");
 const tray = require('./src/tray');
 const process = require('./src/process');
+const profiler = require('./src/profiler');
 
 // Prevent window from being garbage collected
 let mainWindow;
+let loadingWindow;
 
 // Prevent multiple instances of the app
 const applock = app.requestSingleInstanceLock();
@@ -21,19 +22,40 @@ if (!applock) {
 	app.quit();
 } else {
 	unhandled();
-	debug();
 	contextMenu();
 
 	// Note: Must match `build.appId` in package.json
 	app.setAppUserModelId('io.teamviu.app');
-	app.commandLine.appendSwitch("disable-http-cache");
+	// app.commandLine.appendSwitch("disable-http-cache");
 
-	const createMainWindow = async () => {
-		const win = new BrowserWindow({
+	const createLoadingWindow = async () => {
+		loadingWindow = new BrowserWindow({
 			title: app.name,
 			show: true,
-			width: 600,
-			height: 400,
+			width: 150,
+			height: 150,
+			frame: false,
+			webPreferences: {
+				nodeIntegration: false,
+				enableRemoteModule: false,
+				contextIsolation: true,
+				sandbox: true,
+			}
+		});
+
+		loadingWindow.on('closed', () => {
+			loadingWindow = undefined;
+		});
+
+		await loadingWindow.loadFile(path.join(__dirname, 'loading.html'));
+
+		return loadingWindow;
+	};
+
+	const createMainWindow = async () => {
+		mainWindow = new BrowserWindow({
+			title: app.name,
+			show: false,
 			webPreferences: {
 				preload: path.join(__dirname, './preload.js'),
 				nodeIntegration: false,
@@ -43,32 +65,28 @@ if (!applock) {
 			}
 		});
 
-		win.on('ready-to-show', () => {
-			win.show();
+		mainWindow.on('ready-to-show', () => {
+			loadingWindow && loadingWindow.close();
+			mainWindow.show();
 		});
 
-		win.on('closed', () => {
+		mainWindow.webContents.on('did-fail-load', () => {
+		});
+
+		mainWindow.on('closed', () => {
 			// Dereference the window
 			// For multiple windows store them in an array
 			mainWindow = undefined;
 		});
 
-		win.on('page-title-updated', function (e) {
+		mainWindow.on('page-title-updated', function (e) {
 			e.preventDefault();
 		});
 
-		if (is.development || app.getName().startsWith("local-")) {
-			await win.loadURL("http://localhost:3000");
-		} else if (app.getName().startsWith("staging-")) {
-			await win.loadURL("https://dashboard-staging.teamviu.io");
-		}
-		else {
-			await win.loadURL("https://dashboard.teamviu.io");
-		}
+		await loadURL();
+		await mainWindow.maximize();
 
-		await win.maximize();
-
-		return win;
+		return mainWindow;
 	};
 
 	app.on('second-instance', () => {
@@ -76,7 +94,6 @@ if (!applock) {
 			if (mainWindow.isMinimized()) {
 				mainWindow.restore();
 			}
-
 			mainWindow.show();
 		}
 	});
@@ -90,7 +107,7 @@ if (!applock) {
 
 	app.on('activate', async () => {
 		if (!mainWindow) {
-			mainWindow = await createMainWindow();
+			await createMainWindow();
 		}
 	});
 	process.applyEventListeners();
@@ -99,7 +116,22 @@ if (!applock) {
 		await app.whenReady();
 		Menu.setApplicationMenu(menu);
 		tray.createTray(mainWindow);
-		mainWindow = await createMainWindow();
+		await createLoadingWindow();
+		await createMainWindow();
 		updator.checkForUpdate();
+		if (is.development) {
+			setInterval(profiler.logPerformanceMetrics, 5000);
+		}
 	})();
+}
+
+async function loadURL() {
+	if (is.development || app.getName().startsWith("local-")) {
+		await mainWindow.loadURL("https://dashboard-staging.teamviu.io");
+	} else if (app.getName().startsWith("staging-")) {
+		await mainWindow.loadURL("https://dashboard-staging.teamviu.io");
+	}
+	else {
+		await mainWindow.loadURL("https://dashboard.teamviu.io");
+	}
 }
