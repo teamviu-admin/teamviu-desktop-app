@@ -117,6 +117,7 @@ if (!applock) {
 
 	app.on('activate', async () => {
 		if (!mainWindow) {
+			await createLoadingWindow();
 			await createMainWindow();
 		}
 	});
