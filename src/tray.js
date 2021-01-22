@@ -19,9 +19,14 @@ brightTrayIcon = brightTrayIcon.resize({
 module.exports.createTray = function (mainWindow) {
 	const trayMenu = Menu.buildFromTemplate([
 		{
-			label: 'Open dashboard',
+			label: 'Open',
 			click: function () {
-				mainWindow && mainWindow.show();
+				if (mainWindow) {
+					if (mainWindow.isMinimized()) {
+						mainWindow.restore();
+					}
+					mainWindow.show();
+				}
 			}
 		},
 		{

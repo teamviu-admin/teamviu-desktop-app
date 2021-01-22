@@ -1,24 +1,23 @@
 const log = require('electron-log');
-const activeWin = require('active-win');
 const dbService = require('./dbService');
-const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, powerMonitor} = require('electron');
+const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, powerMonitor, dialog, systemPreferences} = require('electron');
+const {is, openSystemPreferences} = require('electron-util');
 const tray = require('./tray');
+const {startMonitoring, stopMonitoring} = require("./monitor/monitor");
 
 let activeSessionId = null;
 let sessionOrganizationId = null;
-let activeWindowInterval = null;
 let currentWindowDescriptor = null;
 
 function getWindowDescriptor(win) {
 	return {
 		"title": win.title,
-		"application": win.owner && win.owner.name,
-		"url": win.url,
+		"application": win.app,
 		"startedAt": Date.now()
 	};
 }
 
-function processWindowTitle(win, forceSave) {
+function processWindowTitle(win) {
 	if (!win) {
 		return;
 	}
@@ -26,12 +25,11 @@ function processWindowTitle(win, forceSave) {
 	if (!currentWindowDescriptor) {
 		currentWindowDescriptor = newWindowDescriptor;
 	}
-	if (newWindowDescriptor.title !== currentWindowDescriptor.title && activeSessionId) {
+	if (newWindowDescriptor.title !== currentWindowDescriptor.title && activeSessionId && sessionOrganizationId) {
 		dbService.activities.insert({
 			"remoteId": null,
 			"title": currentWindowDescriptor.title,
 			"appName": currentWindowDescriptor.application,
-			"url": currentWindowDescriptor.url,
 			"startAt": currentWindowDescriptor.startedAt,
 			"endAt": newWindowDescriptor.startedAt,
 			"sessionId": activeSessionId,
@@ -40,7 +38,7 @@ function processWindowTitle(win, forceSave) {
 			"topic": null,
 			"orgId": sessionOrganizationId
 		}).then(() => {
-			log.info("Saved");
+			log.info("Saved " + currentWindowDescriptor.title);
 		});
 		currentWindowDescriptor = newWindowDescriptor;
 	}
@@ -54,31 +52,17 @@ module.exports.applyEventListeners = function () {
 		log.info("start-work" + JSON.stringify(data));
 		activeSessionId = data.id;
 		sessionOrganizationId = data.orgId;
-		if (activeWindowInterval) {
-			clearInterval(activeWindowInterval);
-			activeWindowInterval = null;
-		}
-		activeWindowInterval = setInterval(function () {
-			activeWin().then((win) => {
-				processWindowTitle(win, false);
-			}).catch((err) => {
-				log.error(err && err.toString());
-			});
-		}, 5000);
+		requestOSPermissionToTrackActivity();
+		startMonitoring(function (win) {
+			log.info(powerMonitor.getSystemIdleTime());
+			processWindowTitle(win);
+		}, -1, 10);
 		tray.startWork();
 	});
 
 	ipcMain.on('stop-work', (event, data) => {
 		log.info("stop-work" + JSON.stringify(data));
-		if (activeWindowInterval) {
-			clearInterval(activeWindowInterval);
-			activeWindowInterval = null;
-		}
-		activeWin().then((win) => {
-			processWindowTitle(win, true);
-		}).catch((err) => {
-			log.error(err && err.toString());
-		});
+		stopMonitoring();
 		activeSessionId = null;
 		tray.stopWork();
 	});
@@ -100,7 +84,6 @@ module.exports.applyEventListeners = function () {
 					"localId": activity._id,
 					"title": activity.title,
 					"appName": activity.appName,
-					"url": activity.url,
 					"startAt": activity.startAt,
 					"endAt": activity.endAt,
 					"sessionId": activity.sessionId,
@@ -124,8 +107,26 @@ module.exports.applyEventListeners = function () {
 			}
 		}
 	});
-
-	setInterval(function () {
-		console.log(powerMonitor.getSystemIdleTime());
-	}, 5 * 60000);
 };
+
+function requestOSPermissionToTrackActivity() {
+	if (!doesHavePermissions()) {
+		dialog.showMessageBox({
+			type: 'question',
+			message: `Allow Accessibility Permission For ${ app.getName()}`,
+			detail: 'We need active window title and appname for deep work analysis. This is optional and you can continue working untracked.',
+			buttons: ['Skip', 'Open System Preferences'],
+			cancelId: 0,
+			defaultId: 1
+		}).then(function (result) {
+			if (result.response === 1) openSystemPreferences('security', 'Privacy_Accessibility');
+		});
+	}
+}
+
+function doesHavePermissions() {
+	if (is.macos && !systemPreferences.isTrustedAccessibilityClient(false)) {
+		return false;
+	}
+	return true;
+}
