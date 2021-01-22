@@ -1,87 +1,87 @@
 {
-  "name": "teamviu",
-  "productName": "Teamviu",
-  "version": "0.0.4",
-  "description": "Deep work tracker for remote tech teams",
-  "license": "MIT",
-  "repository": "teamviu-admin/teamviu-desktop-app",
-  "author": {
-	"name": "Teamviu",
-	"email": "teamviu.io@gmail.com",
-	"url": "https://www.teamviu.io"
-  },
-  "scripts": {
-	"postinstall": "electron-builder install-app-deps",
-	"lint": "xo",
-	"test": "npm run lint",
-	"start": "electron .",
-	"pack": "electron-builder --dir",
-	"dist": "electron-builder --macos --linux --windows",
-	"diststaging": "electron-builder --macos --c.extraMetadata.productName=staging-teamviu",
-	"distlocal": "electron-builder --macos --c.extraMetadata.productName=local-teamviu",
-	"release": "np"
-  },
-  "dependencies": {
-	"electron-context-menu": "^0.15.0",
-	"electron-debug": "^3.0.0",
-	"electron-log": "^4.3.1",
-	"electron-store": "^5.1.0",
-	"electron-unhandled": "^3.0.0",
-	"electron-updater": "^4.0.6",
-	"electron-util": "^0.13.0",
-	"nedb-promises": "^4.0.4"
-  },
-  "devDependencies": {
-	"electron": "^11.2.0",
-	"electron-builder": "^21.2.0",
-	"np": "^5.0.3",
-	"xo": "^0.25.3"
-  },
-  "xo": {
-	"envs": [
-	  "node",
-	  "browser"
-	]
-  },
-  "np": {
-	"tests": false,
-	"publish": false,
-	"releaseDraft": false
-  },
-  "build": {
-	"appId": "io.teamviu.app",
-	"mac": {
-	  "category": "public.app-category.developer-tools",
-	  "darkModeSupport": true
+	"name": "teamviu",
+	"productName": "Teamviu",
+	"version": "0.0.5",
+	"description": "Deep work tracker for remote tech teams",
+	"license": "MIT",
+	"repository": "teamviu-admin/teamviu-desktop-app",
+	"author": {
+		"name": "Teamviu",
+		"email": "teamviu.io@gmail.com",
+		"url": "https://www.teamviu.io"
 	},
-	"dmg": {
-	  "iconSize": 160,
-	  "contents": [
-		{
-		  "x": 180,
-		  "y": 170
+	"scripts": {
+		"postinstall": "electron-builder install-app-deps",
+		"lint": "xo",
+		"test": "npm run lint",
+		"start": "electron .",
+		"pack": "electron-builder --dir",
+		"dist": "electron-builder --macos --linux --windows",
+		"diststaging": "electron-builder --macos --c.extraMetadata.productName=staging-teamviu",
+		"distlocal": "electron-builder --macos --c.extraMetadata.productName=local-teamviu",
+		"release": "np"
+	},
+	"dependencies": {
+		"electron-context-menu": "^0.15.0",
+		"electron-debug": "^3.0.0",
+		"electron-log": "^4.3.1",
+		"electron-store": "^5.1.0",
+		"electron-unhandled": "^3.0.0",
+		"electron-updater": "^4.0.6",
+		"electron-util": "^0.13.0",
+		"nedb-promises": "^4.0.4"
+	},
+	"devDependencies": {
+		"electron": "^11.2.0",
+		"electron-builder": "^21.2.0",
+		"np": "^5.0.3",
+		"xo": "^0.25.3"
+	},
+	"xo": {
+		"envs": [
+			"node",
+			"browser"
+		]
+	},
+	"np": {
+		"tests": false,
+		"publish": false,
+		"releaseDraft": false
+	},
+	"build": {
+		"appId": "io.teamviu.app",
+		"mac": {
+			"category": "public.app-category.developer-tools",
+			"darkModeSupport": true
 		},
-		{
-		  "x": 480,
-		  "y": 170,
-		  "type": "link",
-		  "path": "/Applications"
-		}
-	  ]
-	},
-	"linux": {
-	  "target": [
-		"AppImage",
-		"deb"
-	  ],
-	  "category": "Development;ProjectManagement"
-	},
-	"artifactName": "${productName}.${ext}",
-	"extraResources": [
-	  {
-		"from": "src/monitor/scripts",
-		"to": "scripts"
-	  }
-	]
-  }
+		"dmg": {
+			"iconSize": 160,
+			"contents": [
+				{
+					"x": 180,
+					"y": 170
+				},
+				{
+					"x": 480,
+					"y": 170,
+					"type": "link",
+					"path": "/Applications"
+				}
+			]
+		},
+		"linux": {
+			"target": [
+				"AppImage",
+				"deb"
+			],
+			"category": "Development;ProjectManagement"
+		},
+		"artifactName": "${productName}.${ext}",
+		"extraResources": [
+			{
+				"from": "src/monitor/scripts",
+				"to": "scripts"
+			}
+		]
+	}
 }
