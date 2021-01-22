@@ -1,7 +1,7 @@
 'use strict';
 
 const path = require('path');
-const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, powerMonitor} = require('electron');
+const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, powerMonitor, dialog} = require('electron');
 const unhandled = require('electron-unhandled');
 const contextMenu = require('electron-context-menu');
 const {is} = require('electron-util');
@@ -67,10 +67,20 @@ if (!applock) {
 
 		mainWindow.on('ready-to-show', () => {
 			loadingWindow && loadingWindow.close();
+			loadingWindow = undefined;
 			mainWindow.show();
 		});
 
 		mainWindow.webContents.on('did-fail-load', () => {
+			dialog.showMessageBox({
+				type: 'error',
+				message: `Unable to fetch contents`,
+				detail: 'Check your internet conenction. Use Cmd + R to refresh contents',
+				buttons: ['Ok'],
+				cancelId: 0,
+				defaultId: 0
+			}).then(function (result) {
+			});
 		});
 
 		mainWindow.on('closed', () => {
@@ -126,12 +136,18 @@ if (!applock) {
 }
 
 async function loadURL() {
+	let url = null;
 	if (is.development || app.getName().startsWith("local-")) {
-		await mainWindow.loadURL("https://dashboard-staging.teamviu.io");
+		url = "https://dashboard-staging.teamviu.io";
 	} else if (app.getName().startsWith("staging-")) {
-		await mainWindow.loadURL("https://dashboard-staging.teamviu.io");
+		url = "https://dashboard-staging.teamviu.io";
 	}
 	else {
-		await mainWindow.loadURL("https://dashboard.teamviu.io");
+		url = "https://dashboard.teamviu.io";
+	}
+	try {
+		await mainWindow.loadURL(url);
+	} catch (err) {
+
 	}
 }
