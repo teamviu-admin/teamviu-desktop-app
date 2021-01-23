@@ -15,6 +15,7 @@ const profiler = require('./src/profiler');
 // Prevent window from being garbage collected
 let mainWindow;
 let loadingWindow;
+let iconPath = path.join(__dirname, 'static', 'icon.png');
 
 // Prevent multiple instances of the app
 const applock = app.requestSingleInstanceLock();
@@ -35,6 +36,7 @@ if (!applock) {
 			width: 150,
 			height: 150,
 			frame: false,
+			icon: iconPath,
 			webPreferences: {
 				nodeIntegration: false,
 				enableRemoteModule: false,
@@ -56,6 +58,7 @@ if (!applock) {
 		mainWindow = new BrowserWindow({
 			title: app.name,
 			show: false,
+			icon: iconPath,
 			webPreferences: {
 				preload: path.join(__dirname, './preload.js'),
 				nodeIntegration: false,
@@ -67,6 +70,10 @@ if (!applock) {
 
 		mainWindow.on('ready-to-show', () => {
 			loadingWindow && loadingWindow.close();
+			if (loadingWindow && !loadingWindow.isDestroyed()) {
+				log.info("Loading window wasnt destroyed");
+				loadingWindow.hide();
+			}
 			loadingWindow = undefined;
 			mainWindow.show();
 		});
@@ -75,7 +82,7 @@ if (!applock) {
 			dialog.showMessageBox({
 				type: 'error',
 				message: `Unable to fetch contents`,
-				detail: 'Check your internet conenction. Use Cmd + R to refresh contents',
+				detail: 'Check your internet connection. Select "Reload" from "View" menu to refresh contents',
 				buttons: ['Ok'],
 				cancelId: 0,
 				defaultId: 0
@@ -129,7 +136,7 @@ if (!applock) {
 		tray.createTray(mainWindow);
 		await createLoadingWindow();
 		await createMainWindow();
-		updator.checkForUpdate();
+		updator.checkForUpdates();
 		if (is.development) {
 			setInterval(profiler.logPerformanceMetrics, 5000);
 		}

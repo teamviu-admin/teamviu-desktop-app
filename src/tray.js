@@ -6,14 +6,14 @@ let tray = null;
 let dullTrayIconPath = path.join(__dirname, '..', 'static', 'tray_bw.png');
 let dullTrayIcon = nativeImage.createFromPath(dullTrayIconPath);
 dullTrayIcon = dullTrayIcon.resize({
-	width: 16,
-	height: 16
+	width: 24,
+	height: 24
 });
 let brightTrayIconPath = path.join(__dirname, '..', 'static', 'tray.png');
 let brightTrayIcon = nativeImage.createFromPath(brightTrayIconPath);
 brightTrayIcon = brightTrayIcon.resize({
-	width: 16,
-	height: 16
+	width: 24,
+	height: 24
 });
 
 module.exports.createTray = function (mainWindow) {
