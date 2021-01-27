@@ -8,6 +8,7 @@ const {startMonitoring, stopMonitoring} = require("./monitor/monitor");
 let activeSessionId = null;
 let sessionOrganizationId = null;
 let currentWindowDescriptor = null;
+let idleStatus = "ACTIVE";
 
 function getWindowDescriptor(win) {
 	return {
@@ -44,6 +45,12 @@ function processWindowTitle(win) {
 	}
 }
 
+function processIdleTime() {
+	if (powerMonitor.getSystemIdleTime() > 10) {
+
+	}
+}
+
 module.exports.applyEventListeners = function () {
 	//IPC EVENT HANDLERS
 	//https://stackoverflow.com/questions/52236641/electron-ipc-and-nodeintegration
@@ -54,7 +61,7 @@ module.exports.applyEventListeners = function () {
 		sessionOrganizationId = data.orgId;
 		requestOSPermissionToTrackActivity();
 		startMonitoring(function (win) {
-			log.info(powerMonitor.getSystemIdleTime());
+			processIdleTime();
 			processWindowTitle(win);
 		}, -1, 10);
 		tray.startWork();
@@ -106,6 +113,11 @@ module.exports.applyEventListeners = function () {
 				dbService.activities.delete({_id: activity.localId});
 			}
 		}
+	});
+
+	ipcMain.on('get-version', (event, data) => {
+		log.info("get-version" + JSON.stringify(data));
+		event.sender.send('get-version-result', app.getVersion());
 	});
 };
 

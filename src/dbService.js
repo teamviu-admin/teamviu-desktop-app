@@ -17,13 +17,20 @@ const dbFactory = function (fileName) {
 };
 
 const db = {
-	activities: dbFactory('activities.db')
+	activities: dbFactory('activities.db'),
+	activityLevels: dbFactory('activityLevels.db')
 };
 
 //expire after 4 weeks
 db.activities.load().then(function () {
 	log.info("Applying index on activity.db");
 	db.activities.ensureIndex({fieldName: 'createdAt', expireAfterSeconds: 2419200}, function (err) {
+	});
+});
+
+db.activityLevels.load().then(function () {
+	log.info("Applying index on activityLevels.db");
+	db.activityLevels.ensureIndex({fieldName: 'createdAt', expireAfterSeconds: 2419200}, function (err) {
 	});
 });
 
