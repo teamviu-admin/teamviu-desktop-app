@@ -1,7 +1,7 @@
 {
 	"name": "teamviu",
 	"productName": "Teamviu",
-	"version": "0.0.7",
+	"version": "0.0.8",
 	"description": "Deep work tracker for remote tech teams",
 	"license": "MIT",
 	"repository": "teamviu-admin/teamviu-desktop-app",
@@ -52,7 +52,7 @@
 		"mac": {
 			"category": "public.app-category.developer-tools",
 			"darkModeSupport": true,
-		  	"hardenedRuntime": true
+			"hardenedRuntime": true
 		},
 		"dmg": {
 			"iconSize": 160,
