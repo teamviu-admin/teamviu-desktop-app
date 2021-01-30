@@ -43,19 +43,12 @@ ${debugInfo()}`;
 			});
 		}
 	}, {
-		label: name + " Version " + version
-	}
-];
-
-const debugSubmenu = [
-	{
+		type: 'separator'
+	}, {
 		label: 'Show App Data',
 		click() {
 			shell.openItem(app.getPath('userData'));
 		}
-	},
-	{
-		type: 'separator'
 	},
 	{
 		label: 'Delete App Data',
@@ -64,6 +57,12 @@ const debugSubmenu = [
 			app.relaunch();
 			app.quit();
 		}
+	},
+	{
+		type: 'separator'
+	},
+	{
+		label: name + " Version " + version
 	}
 ];
 
@@ -73,17 +72,25 @@ const macosTemplate = [
 		submenu: [
 			{
 				role: 'close'
+			},
+			{
+				label: "Version " + version
 			}
 		]
 	},
 	{
-		role: 'editMenu'
-	},
-	{
-		role: 'viewMenu'
-	},
-	{
-		role: 'windowMenu'
+		label: 'Refresh',
+		submenu: [
+			{
+				role: 'reload'
+			},
+			{
+				role: 'forceReload'
+			},
+			{
+				role: 'toggleDevTools'
+			}
+		]
 	},
 	{
 		role: 'help',
@@ -98,14 +105,25 @@ const otherTemplate = [
 		submenu: [
 			{
 				role: 'quit'
+			},
+			{
+				label: "Version " + version
 			}
 		]
 	},
 	{
-		role: 'editMenu'
-	},
-	{
-		role: 'viewMenu'
+		label: 'Refresh',
+		submenu: [
+			{
+				role: 'reload'
+			},
+			{
+				role: 'forceReload'
+			},
+			{
+				role: 'toggleDevTools'
+			}
+		]
 	},
 	{
 		role: 'help',
@@ -114,12 +132,5 @@ const otherTemplate = [
 ];
 
 const template = process.platform === 'darwin' ? macosTemplate : otherTemplate;
-
-if (is.development) {
-	template.push({
-		label: 'Debug',
-		submenu: debugSubmenu
-	});
-}
 
 module.exports = Menu.buildFromTemplate(template);
