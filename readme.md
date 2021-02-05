@@ -9,6 +9,7 @@ Teamviu is a privacy focussed time tracking and project management software plat
 ## Install
 
 *macOS 10.10+, Linux, and Windows 7+ are supported (64-bit only).*
+*Else you can also use the web app [**teamviu.io**](https://www.teamviu.io)*
 
 **macOS**
 
@@ -25,6 +26,10 @@ Teamviu is a privacy focussed time tracking and project management software plat
 **Windows**
 
 [**Download**](https://github.com/teamviu-admin/teamviu-desktop-app/releases/latest/download/Teamviu.exe) the `.exe` file.
+
+**Web App**
+[**Go to teamviu.io**](https://www.teamviu.io)
+
 
 ## Build from source
 **Run In Development Mode**
