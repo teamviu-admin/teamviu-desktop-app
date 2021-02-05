@@ -12,9 +12,8 @@ let sessionOrganizationId = null;
 let currentWindowDescriptor = null;
 let idleStatus = "ACTIVE";
 
-let currentState = null;
-let DEEP_THRESHOLD = 180;
-let SHALLOW_THRESHOLD = 600;
+let currentState = 1;
+let IDLE_THRESHOLD = 600;
 
 function getWindowDescriptor(win) {
 	return {
@@ -29,10 +28,8 @@ function getConfig() {
 		.then((response) => {
 			if (response.data.status === 1) {
 				let appConfig = response.data.body;
-				DEEP_THRESHOLD = appConfig.deep;
-				SHALLOW_THRESHOLD = appConfig.shallow;
-				log.info("DEEP_THRESHOLD" + DEEP_THRESHOLD);
-				log.info("SHALLOW_THRESHOLD" + SHALLOW_THRESHOLD);
+				IDLE_THRESHOLD = appConfig.idle;
+				log.info("IDLE_THRESHOLD" + IDLE_THRESHOLD);
 			} else {
 				log.error(response.data.error);
 			}
@@ -70,12 +67,9 @@ function processWindowTitle(win) {
 }
 
 function processIdleTime() {
-	let latestState = 0;
-	if (powerMonitor.getSystemIdleTime() < DEEP_THRESHOLD) {
-		latestState = 2;
-	}
-	else if (powerMonitor.getSystemIdleTime() < SHALLOW_THRESHOLD) {
-		latestState = 1;
+	let latestState = 1;
+	if (powerMonitor.getSystemIdleTime() > IDLE_THRESHOLD) {
+		latestState = 0;
 	}
 	if (latestState !== currentState && latestState != null) {
 		currentState = latestState;
