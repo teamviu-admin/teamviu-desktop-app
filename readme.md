@@ -1,7 +1,10 @@
-# Teamviu Desktop App
+# Teamviu - Deep Work Tracker For Remote Tech Teams
 
-> Deep work tracker for remote tech teams
-https://www.teamviu.io
+![Teamviu.io](https://www.teamviu.io/assets/img/heroshot.png)
+
+Teamviu is a privacy focussed time tracking and project management software platform, available as a web app as well as desktop apps for mac, ubuntu and windows
+
+[Go to teamviu.io](https://www.teamviu.io)
 
 ## Install
 
@@ -13,10 +16,22 @@ https://www.teamviu.io
 
 **Linux**
 
-[**Download**](https://github.com/teamviu-admin/teamviu-desktop-app/releases/latest/download/Teamviu.deb) the `.AppImage` or `.deb` file.
+[**Download**](https://github.com/teamviu-admin/teamviu-desktop-app/releases/latest/download/Teamviu.deb) `.deb` file.
+
+[**Download**](https://github.com/teamviu-admin/teamviu-desktop-app/releases/latest/download/Teamviu.AppImage) `.AppImage` file.
 
 *The AppImage needs to be [made executable](http://discourse.appimage.org/t/how-to-make-an-appimage-executable/80) after download.*
 
 **Windows**
 
 [**Download**](https://github.com/teamviu-admin/teamviu-desktop-app/releases/latest/download/Teamviu.exe) the `.exe` file.
+
+## Build from source
+**Run In Development Mode**
+Install nodejs, npm and run following commands
+npm install
+npm start
+
+**Packaging - creating installation files**
+npm run dist
+
