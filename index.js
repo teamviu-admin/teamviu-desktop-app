@@ -12,6 +12,7 @@ const tray = require('./src/tray');
 const process = require('./src/process');
 const profiler = require('./src/profiler');
 const syncer = require('./src/activitySync');
+const {API, BASE_URL} = require('./src/config');
 
 // Prevent window from being garbage collected
 let mainWindow;
@@ -146,17 +147,8 @@ if (!applock) {
 }
 
 async function loadURL() {
-	let url = null;
-	if (is.development || app.getName().startsWith("local-")) {
-		url = "https://dashboard.teamviu.io";
-	} else if (app.getName().startsWith("staging-")) {
-		url = "https://dashboard-staging.teamviu.io";
-	}
-	else {
-		url = "https://dashboard.teamviu.io";
-	}
 	try {
-		await mainWindow.loadURL(url);
+		await mainWindow.loadURL(BASE_URL);
 	} catch (err) {
 
 	}

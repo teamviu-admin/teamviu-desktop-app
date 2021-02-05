@@ -4,6 +4,8 @@ const {app, BrowserWindow, Menu, Tray, nativeImage, ipcMain, Notification, power
 const {is, openSystemPreferences} = require('electron-util');
 const tray = require('./tray');
 const {startMonitoring, stopMonitoring} = require("./monitor/monitor");
+const axios = require('axios');
+const {API, BASE_URL} = require('./config');
 
 let activeSessionId = null;
 let sessionOrganizationId = null;
@@ -11,6 +13,8 @@ let currentWindowDescriptor = null;
 let idleStatus = "ACTIVE";
 
 let currentState = null;
+let DEEP_THRESHOLD = 180;
+let SHALLOW_THRESHOLD = 600;
 
 function getWindowDescriptor(win) {
 	return {
@@ -18,6 +22,24 @@ function getWindowDescriptor(win) {
 		"application": win.app,
 		"startedAt": Date.now()
 	};
+}
+
+function getConfig() {
+	axios.get(API + '/metrics/app-config')
+		.then((response) => {
+			if (response.data.status === 1) {
+				let appConfig = response.data.body;
+				DEEP_THRESHOLD = appConfig.deep;
+				SHALLOW_THRESHOLD = appConfig.shallow;
+				log.info("DEEP_THRESHOLD" + DEEP_THRESHOLD);
+				log.info("SHALLOW_THRESHOLD" + SHALLOW_THRESHOLD);
+			} else {
+				log.error(response.data.error);
+			}
+		})
+		.catch((error) => {
+			log.error(error);
+		});
 }
 
 function processWindowTitle(win) {
@@ -49,10 +71,10 @@ function processWindowTitle(win) {
 
 function processIdleTime() {
 	let latestState = 0;
-	if (powerMonitor.getSystemIdleTime() < 60) {
+	if (powerMonitor.getSystemIdleTime() < DEEP_THRESHOLD) {
 		latestState = 2;
 	}
-	if (powerMonitor.getSystemIdleTime() < 300) {
+	else if (powerMonitor.getSystemIdleTime() < SHALLOW_THRESHOLD) {
 		latestState = 1;
 	}
 	if (latestState !== currentState && latestState != null) {
@@ -102,6 +124,8 @@ module.exports.applyEventListeners = function () {
 		log.info("get-version" + JSON.stringify(data));
 		event.sender.send('get-version-result', app.getVersion());
 	});
+
+	getConfig();
 };
 
 function requestOSPermissionToTrackActivity() {

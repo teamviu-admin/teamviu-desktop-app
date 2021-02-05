@@ -1,25 +1,12 @@
-const {app, ipcMain} = require('electron');
+const {app, } = require('electron');
 const dbService = require('./dbService');
 const axios = require('axios');
 const {is} = require('electron-util');
 const log = require('electron-log');
+const {API, BASE_URL} = require('./config');
 
-let api = null;
-if (is.development || app.getName().startsWith("local-")) {
-	api = "https://api.teamviu.io";
-} else if (app.getName().startsWith("staging-")) {
-	api = "https://api-staging.teamviu.io";
-}
-else {
-	api = "https://api.teamviu.io";
-}
+
 module.exports.doSync = doSync;
-
-let authHeader = null;
-ipcMain.on('set-auth', (event, data) => {
-	log.info("set-auth" + JSON.stringify(data));
-	axios.defaults.headers.common.Authorization = data.accessToken;
-});
 
 function doSync() {
 	if (!axios.defaults.headers.common.Authorization) {
@@ -48,7 +35,7 @@ function doSyncActivites() {
 				"topic": activity.topic
 			});
 		}
-		axios.post(api + '/sync', transformedActivityDtos)
+		axios.post(API + '/sync', transformedActivityDtos)
 			.then((response) => {
 				if (response.data.status === 1) {
 					let savedActivities = response.data.body;
@@ -82,7 +69,7 @@ function doSyncStates() {
 				"startAt": state.startAt
 			});
 		}
-		axios.post(api + '/sync/state', transformedStateDtos)
+		axios.post(API + '/sync/state', transformedStateDtos)
 			.then((response) => {
 				if (response.data.status === 1) {
 					let savedStates = response.data.body;
