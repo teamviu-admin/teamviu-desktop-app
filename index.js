@@ -11,6 +11,7 @@ const updator = require("./src/updator");
 const tray = require('./src/tray');
 const process = require('./src/process');
 const profiler = require('./src/profiler');
+const syncer = require('./src/activitySync');
 
 // Prevent window from being garbage collected
 let mainWindow;
@@ -140,13 +141,14 @@ if (!applock) {
 		if (is.development) {
 			setInterval(profiler.logPerformanceMetrics, 5000);
 		}
+		setInterval(syncer.doSync, 120000);
 	})();
 }
 
 async function loadURL() {
 	let url = null;
 	if (is.development || app.getName().startsWith("local-")) {
-		url = "https://dashboard-staging.teamviu.io";
+		url = "https://dashboard.teamviu.io";
 	} else if (app.getName().startsWith("staging-")) {
 		url = "https://dashboard-staging.teamviu.io";
 	}

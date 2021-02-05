@@ -7,14 +7,14 @@ contextBridge.exposeInMainWorld(
 	"api", {
 		send: (channel, data) => {
 			// whitelist channels
-			let validChannels = ["start-work", "stop-work", "get-activities", "notification", "get-version"];
+			let validChannels = ["start-work", "stop-work", "notification", "get-version", "set-auth"];
 			if (validChannels.includes(channel)) {
 				ipcRenderer.send(channel, data);
 			}
 		},
 		receive: (channel, func) => {
 			console.log("Inside receive", channel);
-			let validChannels = ["get-activities-result", "get-version-result"];
+			let validChannels = ["get-version-result"];
 			if (validChannels.includes(channel)) {
 				// Deliberately strip event as it includes `sender`
 				ipcRenderer.once(channel, (event, ...args) => func(...args));

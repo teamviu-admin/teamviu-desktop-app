@@ -10,6 +10,8 @@ let sessionOrganizationId = null;
 let currentWindowDescriptor = null;
 let idleStatus = "ACTIVE";
 
+let currentState = null;
+
 function getWindowDescriptor(win) {
 	return {
 		"title": win.title,
@@ -46,8 +48,23 @@ function processWindowTitle(win) {
 }
 
 function processIdleTime() {
-	if (powerMonitor.getSystemIdleTime() > 10) {
-
+	let latestState = 0;
+	if (powerMonitor.getSystemIdleTime() < 60) {
+		latestState = 2;
+	}
+	if (powerMonitor.getSystemIdleTime() < 300) {
+		latestState = 1;
+	}
+	if (latestState !== currentState && latestState != null) {
+		currentState = latestState;
+		dbService.activityLevels.insert({
+			"remoteId": null,
+			"startAt": (new Date()).valueOf(),
+			"sessionId": activeSessionId,
+			"level": currentState
+		}).then(() => {
+			log.info("Saved State " + currentState);
+		});
 	}
 }
 
@@ -78,40 +95,6 @@ module.exports.applyEventListeners = function () {
 		log.info("notification" + JSON.stringify(data));
 		if (Notification.isSupported()) {
 			new Notification({title: data.title, subtitle: data.subtitle}).show();
-		}
-	});
-
-	ipcMain.on('get-activities', (event, data) => {
-		log.info("get-activities" + JSON.stringify(data));
-		dbService.activities.find({"remoteId": null}).sort({startAt: -1}).limit(10).then(function (activities) {
-			log.info("Activity Batch Picked" + activities.length);
-			let transformedActivityDtos = [];
-			for (let activity of activities) {
-				transformedActivityDtos.push({
-					"localId": activity._id,
-					"title": activity.title,
-					"appName": activity.appName,
-					"startAt": activity.startAt,
-					"endAt": activity.endAt,
-					"sessionId": activity.sessionId,
-					"category": activity.category,
-					"subcategory": activity.subcategory,
-					"topic": activity.topic,
-					"orgId": activity.orgId
-				});
-			}
-			event.sender.send('get-activities-result', transformedActivityDtos);
-		}).catch(function (err) {
-			event.sender.send('get-activities-result', []);
-		});
-	});
-
-	ipcMain.on('update-activities', (event, savedActivityDtos) => {
-		log.info("update-activities" + JSON.stringify(savedActivityDtos));
-		for (let activity of savedActivityDtos) {
-			if (activity.remoteId) {
-				dbService.activities.delete({_id: activity.localId});
-			}
 		}
 	});
 
