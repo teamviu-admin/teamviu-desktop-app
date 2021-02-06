@@ -10,7 +10,7 @@ const {API, BASE_URL} = require('./config');
 let activeSessionId = null;
 let sessionOrganizationId = null;
 let currentWindowDescriptor = null;
-let idleStatus = "ACTIVE";
+let newWindowDescriptor = null;
 
 let currentState = 1;
 let IDLE_THRESHOLD = 600;
@@ -39,15 +39,9 @@ function getConfig() {
 		});
 }
 
-function processWindowTitle(win) {
-	if (!win) {
-		return;
-	}
-	let newWindowDescriptor = getWindowDescriptor(win);
-	if (!currentWindowDescriptor) {
-		currentWindowDescriptor = newWindowDescriptor;
-	}
-	if (newWindowDescriptor.title !== currentWindowDescriptor.title && activeSessionId && sessionOrganizationId) {
+function processWindowTitle() {
+	if (newWindowDescriptor && currentWindowDescriptor && activeSessionId && sessionOrganizationId
+		&& newWindowDescriptor.startedAt - currentWindowDescriptor.startedAt > 0) {
 		dbService.activities.insert({
 			"remoteId": null,
 			"title": currentWindowDescriptor.title,
@@ -84,18 +78,34 @@ function processIdleTime() {
 	}
 }
 
+function resetSession(data) {
+	activeSessionId = data ? data.id : null;
+	sessionOrganizationId = data ? data.orgId : null;
+	currentWindowDescriptor = null;
+	newWindowDescriptor = null;
+}
+
 module.exports.applyEventListeners = function () {
 	//IPC EVENT HANDLERS
 	//https://stackoverflow.com/questions/52236641/electron-ipc-and-nodeintegration
 
 	ipcMain.on('start-work', (event, data) => {
 		log.info("start-work" + JSON.stringify(data));
-		activeSessionId = data.id;
-		sessionOrganizationId = data.orgId;
+		resetSession(data);
 		requestOSPermissionToTrackActivity();
 		startMonitoring(function (win) {
 			processIdleTime();
-			processWindowTitle(win);
+			if (!win) {
+				return;
+			}
+			newWindowDescriptor = getWindowDescriptor(win);
+			if (!currentWindowDescriptor) {
+				currentWindowDescriptor = newWindowDescriptor;
+			}
+			if (newWindowDescriptor.title !== currentWindowDescriptor.title
+				|| newWindowDescriptor.startedAt - currentWindowDescriptor.startedAt >= 1000 * IDLE_THRESHOLD) {
+				processWindowTitle();
+			}
 		}, -1, 10);
 		tray.startWork();
 	});
@@ -103,7 +113,8 @@ module.exports.applyEventListeners = function () {
 	ipcMain.on('stop-work', (event, data) => {
 		log.info("stop-work" + JSON.stringify(data));
 		stopMonitoring();
-		activeSessionId = null;
+		processWindowTitle();
+		resetSession(null);
 		tray.stopWork();
 	});
 
