@@ -33,7 +33,7 @@ if (!applock) {
 
 	const createLoadingWindow = async () => {
 		loadingWindow = new BrowserWindow({
-			title: app.name,
+			title: "Teamviu - Remote Team & Project Management",
 			show: true,
 			width: 150,
 			height: 150,
@@ -58,7 +58,7 @@ if (!applock) {
 
 	const createMainWindow = async () => {
 		mainWindow = new BrowserWindow({
-			title: app.name,
+			title: "Teamviu - Remote Team & Project Management",
 			show: false,
 			icon: iconPath,
 			webPreferences: {

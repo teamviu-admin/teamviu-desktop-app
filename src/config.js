@@ -14,8 +14,8 @@ ipcMain.on('set-auth', (event, data) => {
 });
 
 if (is.development || app.getName().startsWith("local-")) {
-	API = "https://api.teamviu.io";
-	BASE_URL = "https://dashboard.teamviu.io";
+	API = "https://api-staging.teamviu.io";
+	BASE_URL = "https://dashboard-staging.teamviu.io";
 } else if (app.getName().startsWith("staging-")) {
 	API = "https://api-staging.teamviu.io";
 	BASE_URL = "https://dashboard-staging.teamviu.io";

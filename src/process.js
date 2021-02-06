@@ -11,6 +11,7 @@ let activeSessionId = null;
 let sessionOrganizationId = null;
 let currentWindowDescriptor = null;
 let newWindowDescriptor = null;
+let askedForPermissionAlready = false;
 
 let currentState = 1;
 let IDLE_THRESHOLD = 600;
@@ -54,7 +55,11 @@ function processWindowTitle() {
 			"topic": null,
 			"orgId": sessionOrganizationId
 		}).then(() => {
-			log.info("Saved " + currentWindowDescriptor.title);
+			if (currentWindowDescriptor) {
+				log.info("Saved " + currentWindowDescriptor.title + " " + currentWindowDescriptor.application);
+			} else {
+				log.info("Saved activity");
+			}
 		});
 		currentWindowDescriptor = newWindowDescriptor;
 	}
@@ -90,6 +95,10 @@ module.exports.applyEventListeners = function () {
 	//https://stackoverflow.com/questions/52236641/electron-ipc-and-nodeintegration
 
 	ipcMain.on('start-work', (event, data) => {
+		if (activeSessionId) {
+			log.info("start-work" + JSON.stringify(data) + " - already in progress");
+			return;
+		}
 		log.info("start-work" + JSON.stringify(data));
 		resetSession(data);
 		requestOSPermissionToTrackActivity();
@@ -134,7 +143,8 @@ module.exports.applyEventListeners = function () {
 };
 
 function requestOSPermissionToTrackActivity() {
-	if (!doesHavePermissions()) {
+	if (!doesHavePermissions() && !askedForPermissionAlready) {
+		askedForPermissionAlready = true;
 		dialog.showMessageBox({
 			type: 'question',
 			message: `Allow Accessibility Permission For ${ app.getName()}`,
