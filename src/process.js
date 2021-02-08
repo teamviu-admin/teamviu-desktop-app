@@ -101,7 +101,7 @@ module.exports.applyEventListeners = function () {
 		}
 		log.info("start-work" + JSON.stringify(data));
 		resetSession(data);
-		requestOSPermissionToTrackActivity();
+		requestOSPermissionToTrackActivity(event);
 		startMonitoring(function (win) {
 			processIdleTime();
 			if (!win) {
@@ -142,8 +142,9 @@ module.exports.applyEventListeners = function () {
 	getConfig();
 };
 
-function requestOSPermissionToTrackActivity() {
+function requestOSPermissionToTrackActivity(event) {
 	if (!doesHavePermissions() && !askedForPermissionAlready) {
+		event.sender.send('show-accessibility-dialog', true);
 		askedForPermissionAlready = true;
 		dialog.showMessageBox({
 			type: 'question',

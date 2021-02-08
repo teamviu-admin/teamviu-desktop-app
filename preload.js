@@ -14,7 +14,7 @@ contextBridge.exposeInMainWorld(
 		},
 		receive: (channel, func) => {
 			console.log("Inside receive", channel);
-			let validChannels = ["get-version-result"];
+			let validChannels = ["get-version-result", "show-accessibility-dialog"];
 			if (validChannels.includes(channel)) {
 				// Deliberately strip event as it includes `sender`
 				ipcRenderer.once(channel, (event, ...args) => func(...args));
