@@ -60,6 +60,8 @@ if (!applock) {
 		mainWindow = new BrowserWindow({
 			title: "Teamviu - Remote Team & Project Management",
 			show: false,
+			width: 1280,
+			height: 800,
 			icon: iconPath,
 			webPreferences: {
 				preload: path.join(__dirname, './preload.js'),
@@ -103,7 +105,7 @@ if (!applock) {
 		});
 
 		await loadURL();
-		await mainWindow.maximize();
+		// await mainWindow.maximize();
 
 		return mainWindow;
 	};
