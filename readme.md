@@ -1,6 +1,6 @@
 # Teamviu - Deep Work Tracker For Remote Tech Teams
 
-![Teamviu.io](https://www.teamviu.io/assets/img/heroshot.png)
+![Teamviu.io](https://www.teamviu.io/assets/img/heroshot.png?version=new)
 
 Teamviu is a privacy focussed time tracking and project management software platform, available as a web app as well as desktop apps for mac, ubuntu and windows
 
